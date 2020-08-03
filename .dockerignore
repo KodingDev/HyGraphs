@@ -1,0 +1,6 @@
+.idea/
+run/
+venv/
+storage/
+.dockerignore
+docker-compose.yml

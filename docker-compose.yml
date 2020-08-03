@@ -1,0 +1,38 @@
+version: "3"
+services:
+  influxdb:
+    image: "library/influxdb:1.7.10"
+    ports:
+      - 8086:8086
+    volumes:
+      - ./storage/influxdb:/var/lib/influxdb
+    environment:
+      - INFLUXDB_DB=hygraphs
+      - INFLUXDB_ADMIN_USER=${INFLUX_USERNAME}
+      - INFLUXDB_ADMIN_PASSWORD=${INFLUX_PASSWORD}
+  app:
+    build: .
+    depends_on:
+      - influxdb
+    links:
+      - influxdb
+    environment:
+      INFLUX_HOST: influxdb
+      INFLUX_USERNAME: ${INFLUX_USERNAME}
+      INFLUX_PASSWORD: ${INFLUX_PASSWORD}
+      HYPIXEL_API_KEY: ${HYPIXEL_API_KEY}
+      UUID: ${UUID}
+  chronograf:
+    image: "library/chronograf:1.8.4"
+    depends_on:
+      - influxdb
+    ports:
+      - 8080:8888
+    links:
+      - influxdb
+    environment:
+      - INFLUXDB_URL=http://influxdb:8086
+      - INFLUXDB_USERNAME=${INFLUX_USERNAME}
+      - INFLUXDB_PASSWORD=${INFLUX_PASSWORD}
+    volumes:
+      - ./storage/chronograf:/var/lib/chronograf
